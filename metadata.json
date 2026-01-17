@@ -1,0 +1,5 @@
+{
+  "name": "Metra Media AI",
+  "description": "Telegram Mini App for real estate automation: generate descriptions, stage furniture, and create 3D floor plans using Gemini AI.",
+  "requestFramePermissions": []
+}
