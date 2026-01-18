@@ -1,6 +1,20 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+// Declare process to appease TypeScript, though Vite handles the replacement at build time.
+declare const process: {
+  env: {
+    API_KEY: string;
+    [key: string]: any;
+  }
+};
+
+const apiKey = process.env.API_KEY;
+
+if (!apiKey) {
+  console.warn("API_KEY is missing. Please set VITE_API_KEY in your Vercel environment variables.");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 // Helper to convert File to Base64
 export const fileToGenerativePart = async (file: File): Promise<{ inlineData: { data: string; mimeType: string } }> => {
@@ -42,7 +56,6 @@ export const generateDescription = async (files: File[]): Promise<string> => {
 
 export const generateRoomStaging = async (file: File): Promise<string | null> => {
   const imagePart = await fileToGenerativePart(file);
-  // Using gemini-2.5-flash-image for image editing/generation
   const prompt = "Furnish this room with basic furniture. Do not change walls, windows, or camera angle. Keep the original structure exactly as is, just add furniture.";
 
   const response = await ai.models.generateContent({
@@ -55,7 +68,6 @@ export const generateRoomStaging = async (file: File): Promise<string | null> =>
     }
   });
 
-  // Extract image from response
   for (const part of response.candidates?.[0]?.content?.parts || []) {
     if (part.inlineData) {
       return `data:image/png;base64,${part.inlineData.data}`;
