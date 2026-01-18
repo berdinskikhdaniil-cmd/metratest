@@ -1,20 +1,17 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Declare process to appease TypeScript, though Vite handles the replacement at build time.
-declare const process: {
-  env: {
-    API_KEY: string;
-    [key: string]: any;
-  }
-};
+// 1. Правильный способ получить ключ в Vite (из Netlify)
+const apiKey = import.meta.env.VITE_API_KEY;
 
-const apiKey = process.env.API_KEY;
-
+// 2. Проверка, что ключ на месте
 if (!apiKey) {
-  console.warn("API_KEY is missing. Please set VITE_API_KEY in your Vercel environment variables.");
+  console.error("❌ ОШИБКА: API ключ не найден! Проверьте настройки Netlify.");
+  // Можно добавить временный ключ для теста, если в Netlify не заработает:
+  // const apiKey = "AIza..."; 
 }
 
-const ai = new GoogleGenAI({ apiKey: apiKey || '' });
+// 3. Создаем ИИ с правильным ключом
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 // Helper to convert File to Base64
 export const fileToGenerativePart = async (file: File): Promise<{ inlineData: { data: string; mimeType: string } }> => {
